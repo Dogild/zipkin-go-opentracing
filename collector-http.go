@@ -2,6 +2,7 @@ package zipkintracer
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -190,19 +191,25 @@ func (c *HTTPCollector) send() error {
 		return nil
 	}
 
+	fmt.Println("Collector send http data")
+
 	req, err := http.NewRequest(
 		"POST",
 		c.url,
 		httpSerialize(sendBatch))
 	if err != nil {
+		fmt.Println("Collector data error " + err.Error())
 		c.logger.Log("err", err.Error())
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-thrift")
 	if _, err = c.client.Do(req); err != nil {
+		fmt.Println("Collector do data error " + err.Error())
 		c.logger.Log("err", err.Error())
 		return err
 	}
+
+	fmt.Println("Collector send http data success")
 
 	// Remove sent spans from the batch
 	c.batchMutex.Lock()
